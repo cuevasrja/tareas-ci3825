@@ -96,46 +96,41 @@ void eliminar(lista *lista, char *elemento){
         return;
     }
     // Si la lista no esta vacia
+    
+    // Creamos un nodo auxiliar
+    nodo *aux = lista->primero;
+    // Si el elemento a eliminar es el primero
+    if(aux->elemento == elemento){
+        // Asignamos el segundo nodo como primero
+        lista->primero = aux->siguiente;
+        // Liberamos el nodo
+        free(aux);
+        // Reducimos la longitud de la lista
+        lista->longitud--;
+    }
+    // Si el elemento a eliminar no es el primero
     else{
-        // Creamos un nodo auxiliar
-        nodo *aux = lista->primero;
-        // Si el elemento a eliminar es el primero
-        if(aux->elemento == elemento){
-            // Asignamos el segundo nodo como primero
-            lista->primero = aux->siguiente;
-            // Liberamos el nodo
-            free(aux);
-            // Marcamos como encontrado
-            encontrado = 1;
-        }
-        // Si el elemento a eliminar no es el primero
-        else{
-            // Mientras el siguiente nodo no sea NULL
-            while(aux->siguiente != NULL){
-                // Si el siguiente nodo es el elemento a eliminar
-                if(aux->siguiente->elemento == elemento){
-                    // Creamos un nodo auxiliar para el nodo a eliminar
-                    nodo *aux2 = aux->siguiente;
-                    // Asignamos el siguiente nodo como siguiente del nodo a eliminar
-                    aux->siguiente = aux->siguiente->siguiente;
-                    // Liberamos el nodo
-                    free(aux2);
-                    // Marcamos como encontrado
-                    encontrado = 1;
-                    // Salimos del bucle
-                    break;
-                }
-                // Si el siguiente nodo no es el elemento a eliminar
-                else{
-                    // Asignamos el siguiente nodo como nodo actual
-                    aux = aux->siguiente;
-                }
+        // Mientras el siguiente nodo no sea NULL
+        while(aux->siguiente != NULL){
+            // Si el siguiente nodo es el elemento a eliminar
+            if(aux->siguiente->elemento == elemento){
+                // Creamos un nodo auxiliar para el nodo a eliminar
+                nodo *aux2 = aux->siguiente;
+                // Asignamos el siguiente nodo como siguiente del nodo a eliminar
+                aux->siguiente = aux->siguiente->siguiente;
+                // Liberamos el nodo
+                free(aux2);
+                // Reducimos la longitud de la lista
+                lista->longitud--;
+                // Salimos del ciclo
+                return;
+            }
+            // Si el siguiente nodo no es el elemento a eliminar
+            else{
+                // Asignamos el siguiente nodo como nodo actual
+                aux = aux->siguiente;
             }
         }
-    }
-    // Si encontramos el elemento, disminuimos la longitud de la lista
-    if(encontrado == 1){
-        lista->longitud--;
     }
 }
 
@@ -166,14 +161,14 @@ void mostrarLista(lista *lista){
     // Mientras el siguiente nodo no sea NULL
     while(aux->siguiente != NULL){
         // Mostramos el elemento del nodo
-        printf("%d. %s\n", i, aux->elemento);
+        printf("\033[92m%d.\033[0m %s\n", i, aux->elemento);
         // Asignamos el siguiente nodo como nodo actual
         aux = aux->siguiente;
         // Aumentamos el contador
         i++;
     }
     // Mostramos el elemento del nodo
-    printf("%d. %s\n", i, aux->elemento);
+    printf("\033[92m%d.\033[0m %s\n", i, aux->elemento);
 }
 
 // Revisar si un elemento esta en la lista. Complejidad: O(n)

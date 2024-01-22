@@ -9,7 +9,7 @@ int MAX_RELACION = 10000;
 char* menu[] = {
     "Salir",
     "Jugar",
-    "Alimentar",
+    "Usar item",
     "Saludar",
     "Ir a la tienda",
 };
@@ -41,7 +41,7 @@ int wattsTienda[] = {
     700,
     800,
     900,
-    1000
+    1500,
 };
 
 int relacionTienda[] = {
@@ -54,7 +54,7 @@ int relacionTienda[] = {
     1000,
     1150,
     1300,
-    1000
+    5000,
 };
 
 int buscar(char* arr[], char* item){
@@ -87,24 +87,19 @@ void bienvenida(){
     
 }
 
-// char* pedirNombre(){
-//     char* nombre = "";
-//     char l;
-//     printf("Quieres ponerle un nombre a tu Pikachu? (s/n): ");
-//     scanf(" %c", &l);
-//     if (l == 's' || l == 'S'){
-//         printf("Como quieres llamar a tu Pikachu?: ");
-//         char caracter = getc(stdin);
-//         // Mientras el caracter introducido no sea un salto de linea
-//         while((caracter = getc(stdin)) != '\n'){
-//             // Concatenamos el caracter al nombre
-//             nombre += caracter;
-//         }
-//         // Devolvemos el nombre
-//         return nombre;
-//     }
-//     return "Pikachu";
-// }
+char* pedirNombre(){
+    char* nombre = malloc(100 * sizeof(char)); // Asigna memoria para 100 caracteres
+    char opcion = 'n';
+    printf("Quieres ponerle un nombre a tu Pikachu? (s/n) ");
+    scanf(" %c", &opcion);
+    if (opcion == 's'){
+        printf("Como quieres llamarlo? ");
+        scanf("%s", nombre);
+        return nombre;
+    }
+    free(nombre); // Libera la memoria si no se usa
+    return "Pikachu";
+}
 
 void mostrarMenu(){
     for (int i = 0; i < cantidadOpciones; i++){
@@ -121,7 +116,7 @@ void mostrarInfo(int watts, int relacionPts){
 
 int leerOpcion(){
     int opcion = -1;
-    printf("Ingrese una opcion: \033[92;1m");
+    printf("Ingrese una opcion (Escriba el numero de la opcion): \033[92;1m");
     scanf("%d", &opcion);
     printf("\033[0m");
     if (opcion < 0 || opcion >= cantidadOpciones){
@@ -147,7 +142,7 @@ void mostrarTienda(int watts){
 
 int leerItem(){
     int opcion = 0;
-    printf("Ingrese una opcion: \033[92;1m");
+    printf("Ingrese una opcion (Escriba el numero de la opcion): \033[92;1m");
     scanf("%d", &opcion);
     printf("\033[0m");
     if (opcion < 1 || opcion > cantidadItemsTienda){
@@ -166,10 +161,7 @@ void comprar(lista *consumibles, int *watts, Pikachu *pikachu){
         printf("\033[91mNo tienes suficientes watts\033[0m\n");
         return;
     }
-    if (obtenerRelacion(pikachu) + relacionTienda[item] > MAX_RELACION){
-        printf("\033[91mNo puedes aumentar mas la relacion\033[0m\n");
-        return;
-    }
+
     *watts -= wattsTienda[item];
     agregar(consumibles, itemsTienda[item]);
     printf("\033[92mHas comprado %s\033[0m\n", itemsTienda[item]);
@@ -384,7 +376,10 @@ void mostrarPikachu(Pikachu *pikachu){
     } else if (relacionPts < 7500){
         pikachuMuyFeliz();
     } else {
-        if (usoElemento(pikachu, itemsTienda[9])) pikachuConGorra();
+        if (usoElemento(pikachu, itemsTienda[9])){ 
+            pikachuConGorra();
+            hablar(pikachu, "Pika pika! (Gracias por la gorra!)");
+        }
         else pikachuAmoroso();
     }
 }
@@ -404,7 +399,7 @@ lista* listaSinRepetidos(lista *consumibles){
 
 int leerInventario(lista *consumibles){
     int opcion = 0;
-    printf("Ingrese una opcion: \033[92;1m");
+    printf("Ingrese una opcion (Escriba el numero de la opcion): \033[92;1m");
     scanf("%d", &opcion);
     printf("\033[0m");
     int n = longitud(consumibles);
@@ -423,12 +418,21 @@ char* preguntarItem(lista *items){
 }
 
 void usarElemento(lista *consumibles, Pikachu *pikachu, char* itemSeleccionado){
-    eliminar(consumibles, itemSeleccionado);
     int i = buscar(itemsTienda, itemSeleccionado);
-    aumentarRelacion(pikachu, relacionTienda[i]);
+    int aumento = 0;
+    if (obtenerRelacion(pikachu) == 10000){
+        printf("\033[91mTu relacion ya es maxima\033[0m\n");
+    }
+    else if (relacionTienda[i] + obtenerRelacion(pikachu) > 10000){
+        printf("\033[91mTu relacion ya es maxima\033[0m\n");
+        aumento += 10000 - obtenerRelacion(pikachu);
+    }
+    else aumento += relacionTienda[i];
+    aumentarRelacion(pikachu, aumento);
     agregarConsumido(pikachu, itemSeleccionado);
     printf("\033[92mHas usado %s\033[0m\n", itemSeleccionado);
-    printf("Tu relacion ha aumentado en \033[92m%d puntos\033[0m\n", relacionTienda[i]);
+    printf("Tu relacion ha aumentado en \033[92m%d puntos\033[0m\n", aumento);
+    eliminar(consumibles, itemSeleccionado);
 }
 
 int pedirApuesta(int watts){
@@ -483,7 +487,7 @@ int main(int argc, char const *argv[]) {
     bienvenida();
     // Inicializar variables
     int watts = 0;
-    char* nombrePikachu = "Pikachu";
+    char* nombrePikachu = pedirNombre();
     Pikachu *pikachu = nuevoPikachu(nombrePikachu);
     lista *consumibles = nuevaLista();
     int opcion = -1;
@@ -499,7 +503,7 @@ int main(int argc, char const *argv[]) {
                 hablar(pikachu, "Pikaaa! (Adios!)");
                 break;
             case 1: // Jugar (Se apuesta)
-                if (watts == 0 || longitud(consumibles) + elementosUsados(pikachu) < 2) printf("No tienes suficientes watts o consumibles\n");
+                if (watts == 0 || longitud(consumibles) + elementosUsados(pikachu) < 2) printf("\033[91mNo tienes suficientes watts o consumibles\033[0m\n");
                 else{
                     // Primero, preguntamos de cuanto va a ser la apuesta
                     int apuesta = pedirApuesta(watts);
@@ -515,8 +519,9 @@ int main(int argc, char const *argv[]) {
                     compararItems(itemRandom, itemSeleccionado, pikachu, &watts, apuesta);
                 }
                 break;
-            case 2: // Alimentar
-                if (estaVacia(consumibles)) printf("No tienes consumibles\n");
+            case 2: // Usar consumible
+                printf("Cantidad de consumibles: \033[92;1m%d\033[0m\n", longitud(consumibles));
+                if (estaVacia(consumibles)) printf("\033[91mNo tienes consumibles\033[0m\n");
                 else{
                     lista* items = listaSinRepetidos(consumibles);
                     mostrarLista(items);

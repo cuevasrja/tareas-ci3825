@@ -1,5 +1,5 @@
-# Compilar en C, el archivo main.c
-# y generar el ejecutable main
+# Tarea 1 - Sistemas Operativos 1 (CI-3825)
+# Juan Andres Cuevas 19-10056
 
 # Variables
 CC = gcc
@@ -8,7 +8,10 @@ TARGET = main-comp
 SRC = main.c
 
 # Reglas
-all: $(TARGET)
+all:
+	$(CC) $(SRC) $(CFLAGS) $(TARGET)
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) $(TARGET) $(SRC)
+.PHONY : clean
+
+clean :
+	rm -rf $(TARGET)

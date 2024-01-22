@@ -200,12 +200,3 @@ void pikachuAmoroso(){
     printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⠾⠋\n");
     printf("\033[0m\n");
 }
-
-int main(){
-    pikachuTriste();
-    pikachuFeliz();
-    pikachuMuyFeliz();
-    pikachuConGorra();
-    pikachuAmoroso();
-    return 0;
-}

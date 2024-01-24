@@ -71,11 +71,11 @@ void bienvenida(){
     Imprimimos el siguiente ASCII Art de color amarillo
 
     
- ______  __  __  __   ______  ______  __  __  __  __    
-/\  == \/\ \/\ \/ /  /\  __ \/\  ___\/\ \_\ \/\ \/\ \   
-\ \  _-/\ \ \ \  _"-.\ \  __ \ \ \___\ \  __ \ \ \_\ \  
- \ \_\   \ \_\ \_\ \_\\ \_\ \_\ \_____\ \_\ \_\ \_____\ 
-  \/_/    \/_/\/_/\/_/ \/_/\/_/\/_____/\/_/\/_/\/_____/ 
+  ______  __  __  __   ______  ______  __  __  __  __    
+ /\  == \/\ \/\ \/ /  /\  __ \/\  ___\/\ \_\ \/\ \/\ \   
+ \ \  _-/\ \ \ \  _"-.\ \  __ \ \ \___\ \  __ \ \ \_\ \  
+  \ \_\   \ \_\ \_\ \_\\ \_\ \_\ \_____\ \_\ \_\ \_____\ 
+   \/_/    \/_/\/_/\/_/ \/_/\/_/\/_____/\/_/\/_/\/_____/ 
                                                         
     */
     printf("\033[93m");
@@ -91,11 +91,13 @@ void bienvenida(){
 char* pedirNombre(){
     char* nombre = malloc(100 * sizeof(char)); // Asigna memoria para 100 caracteres
     char opcion = 'n';
-    printf("Quieres ponerle un nombre a tu Pikachu? (s/n) ");
+    printf("Quieres ponerle un nombre a tu Pikachu? (s/n): \033[92;1m");
     scanf(" %c", &opcion);
+    printf("\033[0m");
     if (opcion == 's'){
-        printf("Como quieres llamarlo? ");
+        printf("Como quieres llamarlo? \033[92;1m");
         scanf("%s", nombre);
+        printf("\033[0m");
         return nombre;
     }
     free(nombre); // Libera la memoria si no se usa
@@ -146,9 +148,11 @@ int leerItem(){
     printf("Ingrese una opcion (Escriba el numero de la opcion): \033[92;1m");
     scanf("%d", &opcion);
     printf("\033[0m");
-    if (opcion < 1 || opcion > cantidadItemsTienda){
-        printf("\033[91mOpcion invalida\033[91m\n");
-        opcion = leerItem();
+    while (opcion < 1 || opcion > cantidadItemsTienda){
+        printf("\033[91mOpcion invalida\033[0m\n");
+        printf("Ingrese una opcion (Escriba el numero de la opcion): \033[92;1m");
+        scanf("%d", &opcion);
+        printf("\033[0m");
     }
     printf("\n");
     return opcion - 1;
@@ -183,6 +187,7 @@ void mostrarPikachu(Pikachu *pikachu){
         }
         else pikachuAmoroso();
     }
+    hablar(pikachu, "Pika pika! (Hola!)");
 }
 
 lista* listaSinRepetidos(lista *consumibles){
@@ -204,9 +209,11 @@ int leerInventario(lista *consumibles){
     scanf("%d", &opcion);
     printf("\033[0m");
     int n = longitud(consumibles);
-    if (opcion < 1 || opcion > n){
+    while (opcion < 1 || opcion > n){
         printf("\033[91mOpcion invalida\033[0m\n");
-        opcion = leerInventario(consumibles);
+        printf("Ingrese una opcion (Escriba el numero de la opcion): \033[92;1m");
+        scanf("%d", &opcion);
+        printf("\033[0m");
     }
     printf("\n");
     return opcion - 1;
@@ -280,17 +287,19 @@ void compararItems(char* itemRandom, char* itemSeleccionado, Pikachu *pikachu, i
 }
 
 int main(int argc, char const *argv[]) {
+    // Inicializar variables
+    int watts = 0;
+    char* nombrePikachu = pedirNombre();
+    Pikachu *pikachu = nuevoPikachu(nombrePikachu);
+    lista *consumibles = nuevaLista();
     // Guardar el tiempo de inicio
     time_t inicio;
     time(&inicio);
     time_t ultimaActualizacion = inicio;
     // Mostrar bienvenida a Pikachu Virtual
     bienvenida();
-    // Inicializar variables
-    int watts = 0;
-    char* nombrePikachu = pedirNombre();
-    Pikachu *pikachu = nuevoPikachu(nombrePikachu);
-    lista *consumibles = nuevaLista();
+    // Mostrar ASCII Art de Pikachu
+    mostrarPikachu(pikachu);
     int opcion = -1;
     // Mientras la opcion no sea salir
     while(opcion != 0){
@@ -304,7 +313,10 @@ int main(int argc, char const *argv[]) {
                 hablar(pikachu, "Pikaaa! (Adios!)");
                 break;
             case 1: // Jugar (Se apuesta)
-                if (watts == 0 || longitud(consumibles) + elementosUsados(pikachu) < 2) printf("\033[91mNo tienes suficientes watts o consumibles\033[0m\n");
+                if (watts == 0 || longitud(consumibles) < 2) {
+                    printf("\033[91;1mNo tienes suficientes watts o consumibles\033[0m\n");
+                    printf("\033[91mNecesitas al menos 2 consumibles y 1 watt\033[0m\n");
+                }
                 else{
                     // Primero, preguntamos de cuanto va a ser la apuesta
                     int apuesta = pedirApuesta(watts);
@@ -333,7 +345,6 @@ int main(int argc, char const *argv[]) {
             case 3: // Saludar
                 printf("\033[96mTu\033[0m: Hola!\n\n");
                 mostrarPikachu(pikachu);
-                hablar(pikachu, "Pika pika! (Hola!)");
                 break;
             case 4: // Ir a la tienda
                 mostrarTienda(watts);

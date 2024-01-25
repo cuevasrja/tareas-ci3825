@@ -273,10 +273,6 @@ int main(int argc, char const *argv[]) {
     char* nombrePikachu = pedirNombre();
     Pikachu *pikachu = nuevoPikachu(nombrePikachu);
     lista *consumibles = nuevaLista();
-    agregar(consumibles, "baya");
-    agregar(consumibles, "baya");
-    agregar(consumibles, "baya");
-    agregar(consumibles, "bayamarga");
     // Guardar el tiempo de inicio
     time_t inicio;
     time(&inicio);

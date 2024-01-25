@@ -1,3 +1,5 @@
 # Ignora los archivos compilados
 *-comp
 *-comp.*
+*.out
+*.o

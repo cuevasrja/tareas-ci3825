@@ -3,15 +3,22 @@
 
 # Variables
 CC = gcc
-CFLAGS = -o
-TARGET = main-comp
-SRC = main.c
+CFLAGS = -c
+LFLAGS = -o
+TARGET = main.out
+SRC = listaEnlazada.c pikachu.c pikachus_ascii.c main.c
+OBJ = $(SRC:.c=.o)
 
 # Reglas
-all:
-	$(CC) $(SRC) $(CFLAGS) $(TARGET)
+.PHONY : all clean
 
-.PHONY : clean
+all: $(TARGET)
+
+$(TARGET): $(OBJ)
+	$(CC) $(LFLAGS) $(TARGET) $(OBJ); rm -rf $(OBJ)
+
+%.o: %.c
+	$(CC) $(CFLAGS) $< -o $@
 
 clean :
-	rm -rf $(TARGET)
+	rm -rf $(TARGET) $(OBJ)

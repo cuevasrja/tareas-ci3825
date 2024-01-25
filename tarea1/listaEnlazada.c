@@ -1,16 +1,12 @@
 # include <stdio.h>
 # include <stdlib.h>
-
-// Creamos la estructura de un nodo
-typedef struct nodo{
-    char *elemento;
-    struct nodo *siguiente;
-} nodo;
+# include <string.h>
+# include "listaEnlazada.h"
 
 // Definimos el constructor del nodo
-nodo *nuevoNodo(char *elemento){
+Nodo *nuevoNodo(char *elemento){
     // Reservamos memoria para el nodo
-    nodo *nuevo = malloc(sizeof(nodo));
+    Nodo *nuevo = malloc(sizeof(Nodo));
     // Asignamos el elemento al nodo
     nuevo->elemento = elemento;
     // Asignamos el siguiente nodo a NULL
@@ -22,35 +18,28 @@ nodo *nuevoNodo(char *elemento){
 // Definimos las funciones del nodo
 
 // Devolver el elemento del nodo. Complejidad: O(1)
-char *obtenerElemento(nodo *nodo){
+char *obtenerElemento(Nodo *nodo){
     // Devolvemos el elemento del nodo
     return nodo->elemento;
 }
 
 // Devolver el siguiente nodo. Complejidad: O(1)
-nodo *obtenerSiguiente(nodo *nodo){
+Nodo *obtenerSiguiente(Nodo *nodo){
     // Devolvemos el siguiente nodo
     return nodo->siguiente;
 }
 
 // Asignar el elemento del nodo. Complejidad: O(1)
-void asignarElemento(nodo *nodo, char *elemento){
+void asignarElemento(Nodo *nodo, char *elemento){
     // Asignamos el elemento al nodo
     nodo->elemento = elemento;
 }
 
 // Asignar el siguiente nodo. Complejidad: O(1)
-void asignarSiguiente(nodo *n, nodo *sig){
+void asignarSiguiente(Nodo *n, Nodo *sig){
     // Asignamos el siguiente nodo
     n->siguiente = sig;
 }
-
-// Creamos la estructura de una lista
-typedef struct lista{
-    nodo *primero;
-    nodo *ultimo;
-    int longitud;
-} lista;
 
 // Definimos el constructor de la lista
 lista *nuevaLista(){
@@ -70,7 +59,7 @@ lista *nuevaLista(){
 // Agregar un elemento a la lista. Complejidad: O(1)
 void agregar(lista *lista, char *elemento){
     // Creamos el nodo
-    nodo *nuevo = nuevoNodo(elemento);
+    Nodo *nuevo = nuevoNodo(elemento);
     // Si la lista esta vacia
     if(lista->longitud == 0){
         // Asignamos el nodo como primero y ultimo
@@ -91,14 +80,14 @@ void agregar(lista *lista, char *elemento){
 void eliminar(lista *lista, char *elemento){
     int encontrado = 0;
     // Si la lista esta vacia
-    if(lista->longitud == 0){
+    if(longitud(lista) == 0){
         // Salimos de la funcion
         return;
     }
     // Si la lista no esta vacia
     
     // Creamos un nodo auxiliar
-    nodo *aux = lista->primero;
+    Nodo *aux = lista->primero;
     // Si el elemento a eliminar es el primero
     if(aux->elemento == elemento){
         // Asignamos el segundo nodo como primero
@@ -107,31 +96,32 @@ void eliminar(lista *lista, char *elemento){
         free(aux);
         // Reducimos la longitud de la lista
         lista->longitud--;
+        return;
     }
     // Si el elemento a eliminar no es el primero
-    else{
-        // Mientras el siguiente nodo no sea NULL
-        while(aux->siguiente != NULL){
-            // Si el siguiente nodo es el elemento a eliminar
-            if(aux->siguiente->elemento == elemento){
-                // Creamos un nodo auxiliar para el nodo a eliminar
-                nodo *aux2 = aux->siguiente;
-                // Asignamos el siguiente nodo como siguiente del nodo a eliminar
-                aux->siguiente = aux->siguiente->siguiente;
-                // Liberamos el nodo
-                free(aux2);
-                // Reducimos la longitud de la lista
-                lista->longitud--;
-                // Salimos del ciclo
-                return;
-            }
-            // Si el siguiente nodo no es el elemento a eliminar
-            else{
-                // Asignamos el siguiente nodo como nodo actual
-                aux = aux->siguiente;
-            }
+    // Mientras el siguiente nodo no sea NULL
+    while(aux->siguiente != NULL){
+        // Si el siguiente nodo es el elemento a eliminar
+        if(aux->siguiente->elemento == elemento){
+            // Creamos un nodo auxiliar para el nodo a eliminar
+            Nodo *aux2 = aux->siguiente;
+            // Asignamos el siguiente nodo como siguiente del nodo a eliminar
+            aux->siguiente = aux->siguiente->siguiente;
+            // Liberamos el nodo
+            free(aux2);
+            free(aux2);
+            // Reducimos la longitud de la lista
+            lista->longitud--;
+            // Salimos del ciclo
+            return;
         }
+        // Si el siguiente nodo no es el elemento a eliminar
+        aux = aux->siguiente;
     }
+    // Si el elemento a eliminar no esta en la lista
+    // Liberamos el nodo
+    free(aux);
+
 }
 
 // Decidir si la lista esta vacia. Complejidad: O(1)
@@ -142,23 +132,21 @@ int estaVacia(lista *lista){
         return 1;
     }
     // Si la lista no esta vacia
-    else{
-        // Devolvemos 0
-        return 0;
-    }
+    // Devolvemos 0
+    return 0;
 }
 
 // Mostrar la lista. Complejidad: O(n)
 void mostrarLista(lista *lista){
     // Si la lista esta vacia
-    if (estaVacia(lista)){
+    if (estaVacia(lista) == 1){
         return;
     }
     // Si la lista no esta vacia
     // Creamos un nodo auxiliar
-    nodo *aux = lista->primero;
+    Nodo *aux = lista->primero;
     int i = 1;
-    // Mientras el siguiente nodo no sea NULL
+    // Mientras aux no sea NULL y el siguiente nodo no sea NULL
     while(aux->siguiente != NULL){
         // Mostramos el elemento del nodo
         printf("\033[92m%d.\033[0m %s\n", i, aux->elemento);
@@ -167,8 +155,10 @@ void mostrarLista(lista *lista){
         // Aumentamos el contador
         i++;
     }
-    // Mostramos el elemento del nodo
-    printf("\033[92m%d.\033[0m %s\n", i, aux->elemento);
+    // Si aux no es NULL, mostramos el elemento del nodo
+    if (aux != NULL) {
+        printf("\033[92m%d.\033[0m %s\n", i, aux->elemento);
+    }
 }
 
 // Revisar si un elemento esta en la lista. Complejidad: O(n)
@@ -179,25 +169,21 @@ int esta(lista *lista, char *elemento){
         return 0;
     }
     // Si la lista no esta vacia
-    else{
-        // Creamos un nodo auxiliar
-        nodo *aux = lista->primero;
-        // Mientras el siguiente nodo no sea NULL
-        while(aux->siguiente != NULL){
-            // Si el elemento esta en la lista
-            if(aux->elemento == elemento){
-                // Devolvemos 1
-                return 1;
-            }
-            // Asignamos el siguiente nodo como nodo actual
-            aux = aux->siguiente;
-        }
-        // Si el ultimo elemento esta en la lista
-        if(aux->elemento == elemento){
+    // Creamos un nodo auxiliar
+    Nodo *aux = lista->primero;
+    // Mientras el siguiente nodo no sea NULL
+    while(aux != NULL){
+        // Si el elemento esta en la lista
+        if(strcmp(aux->elemento, elemento) == 0){
             // Devolvemos 1
             return 1;
         }
+        // Asignamos el siguiente nodo como nodo actual
+        aux = aux->siguiente;
     }
+    // Liberamos el nodo
+    free(aux);
+    // Si el elemento no esta en la lista
     // Devolvemos 0
     return 0;
 }
@@ -229,7 +215,7 @@ char *obtener(lista *lista, int posicion){
     }
     // En caso contrario
     // Creamos un nodo auxiliar
-    nodo *aux = lista->primero;
+    Nodo *aux = lista->primero;
     // Recorremos la lista hasta la posicion indicada
     for(int i = 0; i < posicion; i++){
         // Asignamos el siguiente nodo como nodo actual
@@ -240,19 +226,19 @@ char *obtener(lista *lista, int posicion){
 }
 
 // Devolver el primer nodo de la lista. Complejidad: O(1)
-nodo *obtenerPrimero(lista *lista){
+Nodo *obtenerPrimero(lista *lista){
     // Devolvemos el primer nodo de la lista
     return lista->primero;
 }
 
 // Devolver el ultimo nodo de la lista. Complejidad: O(1)
-nodo *obtenerUltimo(lista *lista){
+Nodo *obtenerUltimo(lista *lista){
     // Devolvemos el ultimo nodo de la lista
     return lista->ultimo;
 }
 
 // Devolver el nodo en la posicion indicada. Complejidad: O(n)
-nodo *obtenerNodo(lista *lista, int posicion){
+Nodo *obtenerNodo(lista *lista, int posicion){
     // Si la posicion es mayor o igual a la longitud de la lista
     if(posicion >= lista->longitud || posicion < 0){
         // Devolvemos NULL
@@ -260,7 +246,7 @@ nodo *obtenerNodo(lista *lista, int posicion){
     }
     // En caso contrario
     // Creamos un nodo auxiliar
-    nodo *aux = lista->primero;
+    Nodo *aux = lista->primero;
     // Recorremos la lista hasta la posicion indicada
     for(int i = 0; i < posicion; i++){
         // Asignamos el siguiente nodo como nodo actual
@@ -268,4 +254,31 @@ nodo *obtenerNodo(lista *lista, int posicion){
     }
     // Devolvemos el nodo
     return aux;
+}
+
+// Calcular la cantidad de veces que aparece un elemento en la lista. Complejidad: O(n)
+int contar(lista *lista, char *elemento){
+    // Si la lista esta vacia
+    if(lista->longitud == 0){
+        // Devolvemos 0
+        return 0;
+    }
+    // Si la lista no esta vacia
+    // Creamos un nodo auxiliar
+    Nodo *aux = lista->primero;
+    int contador = 0;
+    // Mientras el siguiente nodo no sea NULL
+    while(aux != NULL){
+        // Si el elemento esta en la lista
+        if(strcmp(aux->elemento, elemento) == 0){
+            // Aumentamos el contador
+            contador++;
+        }
+        // Asignamos el siguiente nodo como nodo actual
+        aux = aux->siguiente;
+    }
+    // Liberamos el nodo
+    free(aux);
+    // Devolvemos el contador
+    return contador;
 }

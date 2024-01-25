@@ -1,13 +1,7 @@
 # include <stdio.h>
 # include <stdlib.h>
-# include "listaEnlazada.c"
-
-// Creamos la estructura de un Pikachu
-typedef struct Pikachu{
-    char *nombre;
-    int relacion;
-    lista *consumidos;
-} Pikachu;
+# include "listaEnlazada.h"
+# include "pikachu.h"
 
 // Definimos el constructor del Pikachu
 Pikachu *nuevoPikachu(char *nombre){

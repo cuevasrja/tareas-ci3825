@@ -2,65 +2,41 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include "pikachu.c"
-#include "pikachus_ascii.c"
+#include <ctype.h>
+#include "listaEnlazada.h"
+#include "pikachu.h"
+#include "pikachus_ascii.h"
+#include "main.h"
+
 
 int MAX_RELACION = 10000;
 
-char* menu[] = {
-    "Salir",
-    "Jugar",
-    "Usar item",
-    "Saludar",
-    "Ir a la tienda",
-};
-
 int cantidadOpciones = sizeof(menu) / sizeof(menu[0]);
-
-char* itemsTienda[] = {
-    "Baya",
-    "Bayamarga",
-    "Pokeball",
-    "Antiparabaya",
-    "Baya misterio",
-    "Baya milagro",
-    "Baya dorada",
-    "Baya importada",
-    "Caramelo Raro",
-    "Gorra de Ash",
-};
 
 int cantidadItemsTienda = sizeof(itemsTienda) / sizeof(itemsTienda[0]);
 
-int wattsTienda[] = {
-    100,
-    200,
-    300,
-    400,
-    500,
-    600,
-    700,
-    800,
-    900,
-    1500,
-};
+char* minusculas(char* str){
+    char* str2 = malloc(strlen(str) * sizeof(char));
+    for (int i = 0; i < strlen(str); i++){
+        str2[i] = tolower(str[i]);
+    }
+    return str2;
+}
 
-int relacionTienda[] = {
-    100,
-    250,
-    400,
-    550,
-    700,
-    850,
-    1000,
-    1150,
-    1300,
-    5000,
-};
-
-int buscar(char* arr[], char* item){
+int buscarTienda(char* arr[], char* item){
+    char* item2 = minusculas(item);
     for (int i = 0; i < cantidadItemsTienda; i++){
-        if (strcmp(arr[i], item) == 0) return i;
+        char* itemTienda = minusculas(arr[i]);
+        if (strcmp(item2, itemTienda) == 0) return i;
+    }
+    return -1;
+}
+
+int buscarMenu(char* arr[], char* item){
+    char* item2 = minusculas(item);
+    for (int i = 0; i < cantidadOpciones; i++){
+        char* menu = minusculas(arr[i]);
+        if (strcmp(item2, menu) == 0) return i;
     }
     return -1;
 }
@@ -106,7 +82,7 @@ char* pedirNombre(){
 
 void mostrarMenu(){
     for (int i = 0; i < cantidadOpciones; i++){
-        printf("\033[92m%d.\033[0m %s\n", i, menu[i]);
+        printf("\033[92m%d.\033[0m %s\n", i+1, menu[i]);
     }
 }
 
@@ -119,14 +95,14 @@ void mostrarInfo(int watts, int relacionPts){
 
 int leerOpcion(){
     int opcion = -1;
-    printf("Ingrese una opcion (Escriba el numero de la opcion): \033[92;1m");
-    scanf("%d", &opcion);
+    char* texto = malloc(100 * sizeof(char));
+    printf("Ingrese una opcion: \033[92;1m");
+    // Leemos el texto con espacios
+    scanf(" %[^\n]s", texto);
+    opcion = buscarMenu(menu, texto);
     printf("\033[0m");
-    if (opcion < 0 || opcion >= cantidadOpciones){
-        printf("\033[91mOpcion invalida\033[0m\n");
-        opcion = leerOpcion();
-    }
     printf("\n");
+    free(texto);
     return opcion;
 }
 
@@ -144,18 +120,21 @@ void mostrarTienda(int watts){
 }
 
 int leerItem(){
-    int opcion = 0;
-    printf("Ingrese una opcion (Escriba el numero de la opcion): \033[92;1m");
-    scanf("%d", &opcion);
+    int opcion = -1;
+    char* texto = malloc(100 * sizeof(char));
+    printf("Ingrese una opcion: \033[92;1m");
+    scanf(" %[^\n]s", texto);
+    opcion = buscarTienda(itemsTienda, texto);
     printf("\033[0m");
-    while (opcion < 1 || opcion > cantidadItemsTienda){
+    while (opcion == -1){
         printf("\033[91mOpcion invalida\033[0m\n");
-        printf("Ingrese una opcion (Escriba el numero de la opcion): \033[92;1m");
-        scanf("%d", &opcion);
+        printf("Ingrese una opcion: \033[92;1m");
+        scanf(" %[^\n]s", texto);
+        opcion = buscarTienda(itemsTienda, texto);
         printf("\033[0m");
     }
     printf("\n");
-    return opcion - 1;
+    return opcion;
 }
 
 void comprar(lista *consumibles, int *watts, Pikachu *pikachu){
@@ -168,7 +147,7 @@ void comprar(lista *consumibles, int *watts, Pikachu *pikachu){
     }
 
     *watts -= wattsTienda[item];
-    agregar(consumibles, itemsTienda[item]);
+    agregar(consumibles, minusculas(itemsTienda[item]));
     printf("\033[92mHas comprado %s\033[0m\n", itemsTienda[item]);
 }
 
@@ -193,40 +172,42 @@ void mostrarPikachu(Pikachu *pikachu){
 lista* listaSinRepetidos(lista *consumibles){
     lista* items = nuevaLista();
     int n = longitud(consumibles);
-    nodo *node = obtenerPrimero(consumibles);
+    Nodo *node = obtenerPrimero(consumibles);
     while (node != NULL){
-        if (!esta(items, node->elemento)){
+        if (esta(items, node->elemento) == 0){
             agregar(items, node->elemento);
         }
-        node = node->siguiente;
+        node = obtenerSiguiente(node);
     }
+    // Liberamos la memoria
+    free(node);
     return items;
 }
 
-int leerInventario(lista *consumibles){
-    int opcion = 0;
-    printf("Ingrese una opcion (Escriba el numero de la opcion): \033[92;1m");
-    scanf("%d", &opcion);
+char* leerInventario(lista *consumibles){
+    char* texto = malloc(100 * sizeof(char));
+    printf("Ingrese una opcion: \033[92;1m");
+    scanf(" %[^\n]s", texto);
+    texto = minusculas(texto);
     printf("\033[0m");
-    int n = longitud(consumibles);
-    while (opcion < 1 || opcion > n){
+    while (esta(consumibles, texto) == 0){
         printf("\033[91mOpcion invalida\033[0m\n");
-        printf("Ingrese una opcion (Escriba el numero de la opcion): \033[92;1m");
-        scanf("%d", &opcion);
+        printf("Ingrese una opcion: \033[92;1m");
+        scanf(" %[^\n]s", texto);
+        texto = minusculas(texto);
         printf("\033[0m");
     }
     printf("\n");
-    return opcion - 1;
+    return texto;
 }
 
 char* preguntarItem(lista *items){
     printf("Que item quieres usar? ");
-    int item = leerInventario(items);
-    return obtener(items, item);
+    return leerInventario(items);
 }
 
 void usarElemento(lista *consumibles, Pikachu *pikachu, char* itemSeleccionado){
-    int i = buscar(itemsTienda, itemSeleccionado);
+    int i = buscarTienda(itemsTienda, itemSeleccionado);
     int aumento = 0;
     if (obtenerRelacion(pikachu) == 10000){
         printf("\033[91mTu relacion ya es maxima\033[0m\n");
@@ -255,18 +236,6 @@ int pedirApuesta(int watts){
     return apuesta;
 }
 
-int adivinarItem(lista *items){
-    int opcion = 0;
-    printf("Que item crees que es?: \033[92;1m");
-    scanf("%d", &opcion);
-    printf("\033[0m");
-    if (opcion < 1 || opcion > longitud(items)){
-        printf("\033[91mOpcion invalida\033[0m\n");
-        opcion = adivinarItem(items);
-    }
-    return opcion;
-}
-
 void compararItems(char* itemRandom, char* itemSeleccionado, Pikachu *pikachu, int *watts, int apuesta){
     // Si el item seleccionado es el mismo que el item random
     if (strcmp(itemRandom, itemSeleccionado) == 0){
@@ -286,12 +255,28 @@ void compararItems(char* itemRandom, char* itemSeleccionado, Pikachu *pikachu, i
     }
 }
 
+void mostrarInventario(lista *consumibles){
+    lista* items = listaSinRepetidos(consumibles);
+    Nodo *node = obtenerPrimero(items);
+    int i = 1;
+    while (node != NULL){
+        int cantidad = contar(consumibles, node->elemento);
+        printf("\033[92m%d.\033[0m %s \033[92;1mx%d\033[0m\n", i, node->elemento, cantidad);
+        node = obtenerSiguiente(node);
+        i++;
+    }
+}
+
 int main(int argc, char const *argv[]) {
     // Inicializar variables
     int watts = 0;
     char* nombrePikachu = pedirNombre();
     Pikachu *pikachu = nuevoPikachu(nombrePikachu);
     lista *consumibles = nuevaLista();
+    agregar(consumibles, "baya");
+    agregar(consumibles, "baya");
+    agregar(consumibles, "baya");
+    agregar(consumibles, "bayamarga");
     // Guardar el tiempo de inicio
     time_t inicio;
     time(&inicio);
@@ -327,8 +312,7 @@ int main(int argc, char const *argv[]) {
                     // Mostramos los items
                     mostrarLista(items);
                     // Preguntamos por el item
-                    int i = adivinarItem(items) - 1;
-                    char* itemSeleccionado = obtener(items, i);
+                    char* itemSeleccionado = leerInventario(items);
                     compararItems(itemRandom, itemSeleccionado, pikachu, &watts, apuesta);
                 }
                 break;
@@ -349,6 +333,14 @@ int main(int argc, char const *argv[]) {
             case 4: // Ir a la tienda
                 mostrarTienda(watts);
                 comprar(consumibles, &watts, pikachu);
+                break;
+            case 5: // Mostrar Inventario
+                printf("Cantidad de consumibles: \033[92;1m%d\033[0m\n", longitud(consumibles));
+                if (estaVacia(consumibles)) printf("\033[91mNo tienes consumibles\033[0m\n");
+                else mostrarInventario(consumibles);
+                break;
+            default:
+                printf("\033[91mOpcion invalida\033[0m\n");
                 break;
         }
         if (opcion > 1 || opcion < 4) watts += 10;

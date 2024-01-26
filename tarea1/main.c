@@ -17,26 +17,32 @@ int cantidadItemsTienda = sizeof(itemsTienda) / sizeof(itemsTienda[0]);
 
 char* minusculas(char* str){
     char* str2 = malloc(strlen(str) * sizeof(char));
-    for (int i = 0; i < strlen(str); i++){
+    int i = 0;
+    while (i < strlen(str)){
         str2[i] = tolower(str[i]);
+        i++;
     }
     return str2;
 }
 
 int buscarTienda(char* arr[], char* item){
     char* item2 = minusculas(item);
-    for (int i = 0; i < cantidadItemsTienda; i++){
+    int i = 0;
+    while(i < cantidadItemsTienda){
         char* itemTienda = minusculas(arr[i]);
         if (strcmp(item2, itemTienda) == 0) return i;
+        i++;
     }
     return -1;
 }
 
 int buscarMenu(char* arr[], char* item){
     char* item2 = minusculas(item);
-    for (int i = 0; i < cantidadOpciones; i++){
+    int i = 0;
+    while(i < cantidadOpciones){
         char* menu = minusculas(arr[i]);
         if (strcmp(item2, menu) == 0) return i;
+        i++;
     }
     return -1;
 }
@@ -81,8 +87,10 @@ char* pedirNombre(){
 }
 
 void mostrarMenu(){
-    for (int i = 0; i < cantidadOpciones; i++){
+    int i = 0;
+    while(i < cantidadOpciones){
         printf("\033[92m%d.\033[0m %s\n", i+1, menu[i]);
+        i++;
     }
 }
 
@@ -114,8 +122,10 @@ void mostrarTienda(int watts){
     printf("Bienvenido a la tienda!\n");
     printf("Tienes \033[92m%d Watts\033[0m\n", watts);
     printf("Estos son los items disponibles:\n");
-    for (int i = 0; i < cantidadItemsTienda; i++){
+    int i = 0;
+    while(i < cantidadItemsTienda){
         printf("\033[92m%d. \033[0;1m%s\033[0m - \033[94m%d Watts\033[0m - \033[95m%d Puntos de relacion\033[0m\n", i+1, itemsTienda[i], wattsTienda[i], relacionTienda[i]);
+        i++;
     }
 }
 
@@ -160,7 +170,7 @@ void mostrarPikachu(Pikachu *pikachu){
     } else if (relacionPts < 7500){
         pikachuMuyFeliz();
     } else {
-        if (usoElemento(pikachu, itemsTienda[9])){ 
+        if (usoElemento(pikachu, minusculas(itemsTienda[9]))){ 
             pikachuConGorra();
             hablar(pikachu, "Pika pika! (Gracias por la gorra!)");
         }

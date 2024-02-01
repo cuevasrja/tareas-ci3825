@@ -7,18 +7,13 @@ CFLAGS = -c
 LFLAGS = -o
 TARGET = main.out
 SRC = listaEnlazada.c pikachu.c pikachus_ascii.c main.c
-OBJ = $(SRC:.c=.o)
+SRC_H = listaEnlazada.h pikachu.h pikachus_ascii.h main.h
 
 # Reglas
 .PHONY : all clean
 
-all: $(TARGET)
-
-$(TARGET): $(OBJ)
-	$(CC) $(LFLAGS) $(TARGET) $(OBJ); rm -rf $(OBJ)
-
-%.o: %.c
-	$(CC) $(CFLAGS) $< -o $@
+all:
+	$(CC) $(LFLAGS) $(TARGET) $(SRC) $(SRC_H) 
 
 clean :
-	rm -rf $(TARGET) $(OBJ)
+	rm -rf $(TARGET) *.o

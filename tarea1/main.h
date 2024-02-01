@@ -60,9 +60,8 @@ int relacionTienda[] = {
     5000,
 };
 
-int buscarTienda(char* arr[], char* item);
-int buscarMenu(char* arr[], char* item);
 char* minusculas(char* str);
+int buscarIndice(char* arr[], char* item, int n);
 void bienvenida();
 char* pedirNombre();
 void mostrarMenu();

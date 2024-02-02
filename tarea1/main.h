@@ -68,6 +68,7 @@ void mostrarMenu();
 void mostrarInfo(int watts, int relacionPts);
 int leerOpcion();
 int actualizarWatts(time_t ultimaActualizacion, time_t ahora);
+void actualizarRelacion(Pikachu *pikachu, time_t ultimaActualizacion, time_t ahora);
 void mostrarTienda(int watts);
 int leerItem();
 void comprar(lista *consumibles, int *watts, Pikachu *pikachu);

@@ -136,10 +136,24 @@ int leerOpcion(){
 /**
  * Funcion que muestra los items de la tienda
  * @param watts: cantidad de watts
+ * @return cantidad de watts
 */
 int actualizarWatts(time_t ultimaActualizacion, time_t ahora){
     return (int) difftime(ahora, ultimaActualizacion);
 }
+
+/**
+ * Funcion para actualizar la relacion de Pikachu
+ * @param pikachu: Pikachu
+ * @param ultimaActualizacion: tiempo de la ultima actualizacion
+ * @param ahora: tiempo actual
+*/
+void actualizarRelacion(Pikachu *pikachu, time_t ultimaActualizacion, time_t ahora){
+    int segundos = (int) difftime(ahora, ultimaActualizacion);
+    if (obtenerRelacion(pikachu) - segundos < 0) aumentarRelacion(pikachu, -obtenerRelacion(pikachu));
+    else aumentarRelacion(pikachu, -segundos);
+}
+
 
 /**
  * Funcion que muestra los items de la tienda
@@ -431,6 +445,7 @@ int main(int argc, char const *argv[]) {
         time_t ahora;
         time(&ahora);
         watts += actualizarWatts(ultimaActualizacion, ahora);
+        actualizarRelacion(pikachu, ultimaActualizacion, ahora);
         ultimaActualizacion = ahora;
         printf("\n");
     }
